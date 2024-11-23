@@ -55,13 +55,7 @@ def main(dataset, minute, epoch, loss, base):
     )
 
     model = ContrailModel(arch="UNet", in_channels=1, out_classes=1, loss=loss)
-
-    # callback_save_model = lightning.callbacks.ModelCheckpoint(
-    #     dirpath="data/models/",
-    #     filename="google-dice-{epoch:02d}epoch.torch",
-    #     save_top_k=-1,
-    #     every_n_epochs=10,
-    # )
+    # model = Custom(in_channels=1, out_classes=1, loss=loss)
 
     if minute is not None:
         trainer = lightning.Trainer(

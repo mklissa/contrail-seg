@@ -7,12 +7,14 @@ import torch
 
 import loss
 
+from unet import Unet
+
 # %%
 # avoid error for downloading pre-trained model
 ssl._create_default_https_context = ssl._create_unverified_context
 
 # %%
-ENCODER_NAME = "resnet50"
+ENCODER_NAME = "resnet18"
 
 
 # %%
@@ -25,12 +27,18 @@ class ContrailModel(lightning.LightningModule):
         if "loss" in kwargs_:
             kwargs_.pop("loss")
 
-        self.model = smp.create_model(
-            arch,
+        # self.model = smp.create_model(
+        #     arch,
+        #     encoder_name=ENCODER_NAME,
+        #     in_channels=in_channels,
+        #     classes=out_classes,
+        #     **kwargs_,
+        # )
+
+        self.model = Unet(
             encoder_name=ENCODER_NAME,
             in_channels=in_channels,
             classes=out_classes,
-            **kwargs_,
         )
 
         # preprocessing parameters for image
@@ -61,6 +69,7 @@ class ContrailModel(lightning.LightningModule):
         return mask
 
     def shared_step(self, batch, stage):
+
         image = batch[0]
 
         # Shape of the image should be (batch_size, num_channels, height, width)
@@ -83,6 +92,7 @@ class ContrailModel(lightning.LightningModule):
         assert mask.max() <= 1.0 and mask.min() >= 0
 
         pred_mask = self.forward(image)
+
         loss = self.loss_fn(pred_mask, mask)
         dice = self.dice(pred_mask, mask)
 
