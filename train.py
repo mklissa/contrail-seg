@@ -21,7 +21,8 @@ warnings.filterwarnings("ignore")
 @click.option("--epoch", required=False, type=int, help="minutes")
 @click.option("--loss", required=True, help="dice, focal, or sr")
 @click.option("--base", required=False, help="dice or focal (for sr loss)")
-def main(dataset, minute, epoch, loss, base):
+@click.option("--rgb", required=False, help="to create the RGB channels")
+def main(dataset, minute, epoch, loss, base, rgb):
 
     print(
         f"training: {dataset} data, {minute} minutes, {epoch} epoch, {loss} loss, {base} base"
@@ -30,7 +31,7 @@ def main(dataset, minute, epoch, loss, base):
     torch.cuda.empty_cache()
 
     if dataset == "own":
-        train_dataset, val_dataset = data.own_dataset()
+        train_dataset, val_dataset = data.own_dataset(to_rgb=rgb)
     elif dataset == "google":
         train_dataset, val_dataset = data.google_dataset()
     elif dataset.startswith("google:fewshot:"):

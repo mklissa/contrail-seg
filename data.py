@@ -91,7 +91,7 @@ def get_test_augmentation(image_size=DEFAULT_IMG_SIZE):
     return albu.Compose(transform)
 
 
-def get_preprocessing():
+def get_preprocessing(to_rgb=False):
     """Construct preprocessing transform
 
     Return:
@@ -102,9 +102,15 @@ def get_preprocessing():
     def to_tensor(input, **kwargs):
         return np.expand_dims(input, 0).astype("float32")
 
+    def image_fn(input, **kwargs):
+        output = np.expand_dims(input, 0).astype("float32")
+        if to_rgb:
+            output = np.repeat(output, 3, axis=0)
+        return output
+
     _transform = [
         # albu.Lambda(image=smp.encoders.get_preprocessing_fn(ENCODER_NAME)),
-        albu.Lambda(image=to_tensor, mask=to_tensor),
+        albu.Lambda(image=image_fn, mask=to_tensor),
     ]
     return albu.Compose(_transform)
 
@@ -157,6 +163,7 @@ class OwnDataset(BaseDataset):
         super().__init__(*args, **kwargs)
 
     def __getitem__(self, i):
+
         # read image in color
         image = cv2.imread(self.image_paths[i], cv2.IMREAD_GRAYSCALE)
 
@@ -246,7 +253,7 @@ class GoogleDataset(BaseDataset):
             return image
 
 
-def own_dataset(train=True):
+def own_dataset(train=True, to_rgb=False):
     image_paths = sorted(glob.glob(f"data/goes/**/image/*.png"))
     mask_paths = sorted(glob.glob(f"data/goes/**/mask/*.png"))
 
@@ -258,14 +265,14 @@ def own_dataset(train=True):
         x_train,
         y_train,
         augmentation=get_train_augmentation() if train else get_test_augmentation(),
-        preprocessing=get_preprocessing(),
+        preprocessing=get_preprocessing(to_rgb=to_rgb),
     )
 
     val_dataset = OwnDataset(
         x_val,
         y_val,
         augmentation=get_val_augmentation() if train else get_test_augmentation(),
-        preprocessing=get_preprocessing(),
+        preprocessing=get_preprocessing(to_rgb=to_rgb),
     )
 
     return train_dataset, val_dataset
