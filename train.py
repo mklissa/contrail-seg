@@ -55,7 +55,6 @@ def main(dataset, minute, epoch, loss, base):
     )
 
     model = ContrailModel(arch="UNet", in_channels=1, out_classes=1, loss=loss)
-    # model = Custom(in_channels=1, out_classes=1, loss=loss)
 
     if minute is not None:
         trainer = lightning.Trainer(

@@ -47,16 +47,21 @@ class ContrailModel(lightning.LightningModule):
         self.register_buffer("mean", torch.tensor(params["mean"]).mean())
 
         loss_name = kwargs.get("loss", "dice").lower()
-        assert loss_name in ["dice", "focal", "sr"]
 
         if loss_name == "dice":
             self.loss_fn = loss.DiceLoss(log_loss=True)
-        if loss_name == "focal":
+        elif loss_name == "focal":
             self.loss_fn = loss.FocalLoss(normalized=False)
-        if loss_name == "sr":
+        elif loss_name == "sr":
             loss_base = kwargs.get("loss_base", "dice").lower()
             assert loss_base in ["dice", "focal"]
             self.loss_fn = loss.SRLoss(loss_base=loss_base)
+        elif loss_name == 'recon':
+            self.loss_fn = torch.nn.MSELoss()
+        else:
+            raise NotImplementedError
+
+        self.pretrain = loss_name == 'recon'
 
         self.dice = loss.DiceLoss(log_loss=False)
 
@@ -93,23 +98,27 @@ class ContrailModel(lightning.LightningModule):
 
         pred_mask = self.forward(image)
 
-        loss = self.loss_fn(pred_mask, mask)
-        dice = self.dice(pred_mask, mask)
+        if self.pretrain:
+            loss = self.loss_fn(pred_mask, image)
+            stats = {"loss": loss}
+        else:
+            loss = self.loss_fn(pred_mask, mask)
+            dice = self.dice(pred_mask, mask)
 
-        # Compute metrics for some threshold
-        # first convert mask values to probabilities, then apply thresholding
-        prob_mask = pred_mask.sigmoid()
-        pred_mask = (prob_mask > 0.5).float()
+            # Compute metrics for some threshold
+            # first convert mask values to probabilities, then apply thresholding
+            prob_mask = pred_mask.sigmoid()
+            pred_mask = (prob_mask > 0.5).float()
 
-        # Compute true positive, false positive, false negative and true negative
-        # of 'pixels' for each image and class. Aggregate them at epoch end.
-        tp, fp, fn, tn = smp.metrics.get_stats(
-            pred_mask.long(), mask.long(), mode="binary"
-        )
+            # Compute true positive, false positive, false negative and true negative
+            # of 'pixels' for each image and class. Aggregate them at epoch end.
+            tp, fp, fn, tn = smp.metrics.get_stats(
+                pred_mask.long(), mask.long(), mode="binary"
+            )
 
-        stats = {"loss": loss, "dice": dice, "tp": tp, "fp": fp, "fn": fn, "tn": tn}
+            stats = {"loss": loss, "dice": dice, "tp": tp, "fp": fp, "fn": fn, "tn": tn}
 
-        self.outputs[stage].append(stats)
+            self.outputs[stage].append(stats)
 
         return stats
 
