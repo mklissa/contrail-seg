@@ -55,7 +55,10 @@ def main(dataset, minute, epoch, loss, base, rgb):
         num_workers=8,
     )
 
-    model = ContrailModel(arch="UNet", in_channels=1, out_classes=1, loss=loss)
+    if rgb:
+        model = ContrailModel(arch="UNet", in_channels=3, out_classes=1, loss=loss)
+    else:
+        model = ContrailModel(arch="UNet", in_channels=1, out_classes=1, loss=loss)
 
     if minute is not None:
         trainer = lightning.Trainer(

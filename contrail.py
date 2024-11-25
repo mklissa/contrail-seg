@@ -27,19 +27,18 @@ class ContrailModel(lightning.LightningModule):
         if "loss" in kwargs_:
             kwargs_.pop("loss")
 
-###
-        # weights_manager = satlaspretrain_models.Weights()
-        # model = weights_manager.get_pretrained_model("Sentinel2_Resnet50_SI_RGB", fpn=True, head=satlaspretrain_models.Head.BINSEGMENT, num_categories=2, device='cpu')
-
-        # device = torch.device('cpu')
-        # model = model.to(device)
-###
-
-        self.model = Unet(
-            encoder_name=ENCODER_NAME,
-            in_channels=in_channels,
-            classes=out_classes,
-        )
+        if in_channels == 3:
+            self.model = Unet(
+                encoder_name="resnet50",
+                in_channels=in_channels,
+                classes=out_classes,
+            )
+        else:
+            self.model = Unet(
+                encoder_name=ENCODER_NAME,
+                in_channels=in_channels,
+                classes=out_classes,
+            )
 
         # preprocessing parameters for image
         params = smp.encoders.get_preprocessing_params(ENCODER_NAME)
