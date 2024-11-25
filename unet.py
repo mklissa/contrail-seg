@@ -73,9 +73,7 @@ class Unet(SegmentationModel):
     ):
         super().__init__()
 
-        if in_channels == 3:
-            weights_manager = satlaspretrain_models.Weights()
-            model = weights_manager.get_pretrained_model(model_identifier="Sentinel2_Resnet50_SI_RGB", device='cpu')
+        if encoder_weights is None:
             self.encoder = get_encoder(
                 encoder_name,
                 in_channels=in_channels,
@@ -83,16 +81,27 @@ class Unet(SegmentationModel):
                 weights=None,
                 **kwargs,
             )
-            state_dict = model.backbone.resnet.state_dict()
-            self.encoder.load_state_dict(state_dict)
         else:
-            self.encoder = get_encoder(
-                encoder_name,
-                in_channels=in_channels,
-                depth=encoder_depth,
-                weights=encoder_weights,
-                **kwargs,
-            )
+            if in_channels == 3:
+                weights_manager = satlaspretrain_models.Weights()
+                model = weights_manager.get_pretrained_model(model_identifier="Sentinel2_Resnet50_SI_RGB", device='cpu')
+                self.encoder = get_encoder(
+                    encoder_name,
+                    in_channels=in_channels,
+                    depth=encoder_depth,
+                    weights=None,
+                    **kwargs,
+                )
+                state_dict = model.backbone.resnet.state_dict()
+                self.encoder.load_state_dict(state_dict)
+            else:
+                self.encoder = get_encoder(
+                    encoder_name,
+                    in_channels=in_channels,
+                    depth=encoder_depth,
+                    weights=encoder_weights,
+                    **kwargs,
+                )
 
         self.decoder = UnetDecoder(
             encoder_channels=self.encoder.out_channels,

@@ -21,8 +21,9 @@ warnings.filterwarnings("ignore")
 @click.option("--epoch", required=False, type=int, help="minutes")
 @click.option("--loss", required=True, help="dice, focal, or sr")
 @click.option("--base", required=False, help="dice or focal (for sr loss)")
-@click.option("--rgb", required=False, help="to create the RGB channels")
-def main(dataset, minute, epoch, loss, base, rgb):
+@click.option("--rgb", required=False, type=bool, help="to create the RGB channels")
+@click.option("--pretrained", required=False, type=bool, help="to set weights")
+def main(dataset, minute, epoch, loss, base, rgb, pretrained):
 
     print(
         f"training: {dataset} data, {minute} minutes, {epoch} epoch, {loss} loss, {base} base"
@@ -56,9 +57,9 @@ def main(dataset, minute, epoch, loss, base, rgb):
     )
 
     if rgb:
-        model = ContrailModel(arch="UNet", in_channels=3, out_classes=1, loss=loss)
+        model = ContrailModel(arch="UNet", in_channels=3, out_classes=1, loss=loss, pretrained=pretrained)
     else:
-        model = ContrailModel(arch="UNet", in_channels=1, out_classes=1, loss=loss)
+        model = ContrailModel(arch="UNet", in_channels=1, out_classes=1, loss=loss, pretrained=pretrained)
 
     if minute is not None:
         trainer = lightning.Trainer(
