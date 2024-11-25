@@ -137,10 +137,14 @@ class ContrailModel(lightning.LightningModule):
             tp, fp, fn, tn, reduction="micro-imagewise"
         )
 
+        per_image_dice = smp.metrics.f1_score(tp, fp, fn, tn, reduction="micro-imagewise"
+        )
+
         # aggregate intersection and union over whole dataset and compute IoU score.
         # For dataset with "empty" images (images without target class), a large gap could be observed.
         # Empty images influence a lot on per_image_iou and much less on dataset_iou.
         dataset_iou = smp.metrics.iou_score(tp, fp, fn, tn, reduction="micro")
+        dataset_dice = smp.metrics.f1_score(tp, fp, fn, tn, reduction="micro")
 
         dice_loss = torch.tensor([x["dice"] for x in self.outputs[stage]]).nanmean()
         model_loss = torch.tensor([x["loss"] for x in self.outputs[stage]]).nanmean()
@@ -148,6 +152,8 @@ class ContrailModel(lightning.LightningModule):
         metrics = {
             f"{stage}_per_image_iou": per_image_iou,
             f"{stage}_dataset_iou": dataset_iou,
+            f"{stage}_per_image_dice": per_image_dice,
+            f"{stage}_dataset_dice": dataset_dice,
             f"{stage}_dice_loss": dice_loss,
             f"{stage}_model_loss": model_loss,
         }
