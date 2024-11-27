@@ -14,7 +14,7 @@ from unet import Unet
 ssl._create_default_https_context = ssl._create_unverified_context
 
 # %%
-ENCODER_NAME = "resnet18"
+ENCODER_NAME = "resnet50"
 
 
 # %%

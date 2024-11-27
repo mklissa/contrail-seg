@@ -32,21 +32,21 @@ def get_train_augmentation(image_size=DEFAULT_IMG_SIZE):
     """Define augmentation for contrail training images."""
 
     transform = [
-        # albu.ShiftScaleRotate(
-        #     scale_limit=0.2,
-        #     rotate_limit=180,
-        #     shift_limit=0.3,
-        #     border_mode=0,
-        #     value=0.0,
-        #     p=1,
-        # ),
-        # albu.PadIfNeeded(
-        #     min_height=image_size,
-        #     min_width=image_size,
-        #     always_apply=True,
-        #     border_mode=0,
-        #     value=0.0,
-        # ),
+        albu.ShiftScaleRotate(
+            scale_limit=0.2,
+            rotate_limit=180,
+            shift_limit=0.3,
+            border_mode=0,
+            value=0.0,
+            p=1,
+        ),
+        albu.PadIfNeeded(
+            min_height=image_size,
+            min_width=image_size,
+            always_apply=True,
+            border_mode=0,
+            value=0.0,
+        ),
         albu.Resize(image_size, image_size),
         albu.RandomBrightnessContrast(brightness_limit=0.2, contrast_limit=0.3, p=0.5),
     ]
@@ -57,21 +57,21 @@ def get_val_augmentation(image_size=DEFAULT_IMG_SIZE):
     """Define augmentation for contrail validation images."""
 
     transform = [
-        # albu.ShiftScaleRotate(
-        #     scale_limit=0.2,
-        #     rotate_limit=180,
-        #     shift_limit=0.3,
-        #     border_mode=0,
-        #     value=0.0,
-        #     p=1,
-        # ),
-        # albu.PadIfNeeded(
-        #     min_height=image_size,
-        #     min_width=image_size,
-        #     always_apply=True,
-        #     value=0.0,
-        #     border_mode=0,
-        # ),
+        albu.ShiftScaleRotate(
+            scale_limit=0.2,
+            rotate_limit=180,
+            shift_limit=0.3,
+            border_mode=0,
+            value=0.0,
+            p=1,
+        ),
+        albu.PadIfNeeded(
+            min_height=image_size,
+            min_width=image_size,
+            always_apply=True,
+            value=0.0,
+            border_mode=0,
+        ),
         albu.Resize(image_size, image_size),
     ]
     return albu.Compose(transform)
@@ -80,12 +80,12 @@ def get_val_augmentation(image_size=DEFAULT_IMG_SIZE):
 def get_test_augmentation(image_size=DEFAULT_IMG_SIZE):
     """Define augmentation for contrail testing images (pad and resize only)."""
     transform = [
-        # albu.PadIfNeeded(
-        #     min_height=image_size,
-        #     min_width=image_size,
-        #     always_apply=True,
-        #     border_mode=0,
-        # ),
+        albu.PadIfNeeded(
+            min_height=image_size,
+            min_width=image_size,
+            always_apply=True,
+            border_mode=0,
+        ),
         albu.Resize(image_size, image_size),
     ]
     return albu.Compose(transform)
