@@ -51,7 +51,7 @@ class DiceLoss(_Loss):
 class FocalLoss(_Loss):
     def __init__(
         self,
-        gamma=2.0,
+        gamma=1.0,
         normalized: bool = False,
         eps=1e-6,
     ):

@@ -84,6 +84,7 @@ def get_test_augmentation(image_size=DEFAULT_IMG_SIZE):
             min_height=image_size,
             min_width=image_size,
             always_apply=True,
+            value=0.0,
             border_mode=0,
         ),
         albu.Resize(image_size, image_size),
